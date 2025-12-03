@@ -9,12 +9,11 @@ export const stabilityClient = axios.create({
         Authorization: `Bearer ${process.env.STABILITY_API_KEY}`,
         Accept: 'image/*',
     },
-    responseType: 'arraybuffer', // We want binary data back
+    responseType: 'arraybuffer',
 });
 
 export async function removeBackground(imageBuffer: Buffer): Promise<Buffer> {
     const formData = new FormData();
-    // Cast Buffer to any to bypass strict BlobPart check in this environment
     formData.append('image', new Blob([imageBuffer as any]));
     formData.append('output_format', 'png');
 
@@ -39,7 +38,7 @@ export async function generateInpaint(
     formData.append('mask', new Blob([maskBuffer as any]));
     formData.append('prompt', prompt);
     formData.append('output_format', 'png');
-    formData.append('mode', 'mask'); // Use the mask provided
+    formData.append('mode', 'mask');
 
     const response = await axios.postForm(STABILITY_INPAINT_URL, formData, {
         headers: {

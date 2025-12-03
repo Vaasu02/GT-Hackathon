@@ -18,9 +18,7 @@ body {
     font-family: var(--font-sans);
 }
 
-/* Custom Utilities for "Rich" look */
 .glass-panel {
-    /* No glassmorphism as requested, but maybe a solid rich dark panel */
     background-color: #111111;
     border: 1px solid #222;
 }

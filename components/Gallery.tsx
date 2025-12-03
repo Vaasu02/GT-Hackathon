@@ -21,20 +21,20 @@ export function Gallery({ results }: GalleryProps) {
         const zip = new JSZip();
         const folder = zip.folder("creatives");
 
-        // Add images and captions to zip
+
         await Promise.all(results.map(async (result, index) => {
-            // Fetch image data
+
             const response = await fetch(result.image);
             const blob = await response.blob();
 
-            // Add image
+
             folder?.file(`variation-${index + 1}.png`, blob);
 
-            // Add caption text file
+
             folder?.file(`variation-${index + 1}-caption.txt`, result.caption);
         }));
 
-        // Generate and download zip
+
         const content = await zip.generateAsync({ type: "blob" });
         const url = window.URL.createObjectURL(content);
         const link = document.createElement('a');

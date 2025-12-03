@@ -3,7 +3,7 @@ import { removeBackground, generateInpaint } from '@/lib/stability';
 import { generateCreativePrompts, generateCaption } from '@/lib/gemini';
 import sharp from 'sharp';
 
-export const maxDuration = 60; // Allow 60 seconds for execution (Vercel/Next.js limit)
+export const maxDuration = 60;
 
 export async function POST(req: NextRequest) {
     try {
@@ -20,24 +20,22 @@ export async function POST(req: NextRequest) {
             );
         }
 
-        // 1. Convert inputs to Buffers
+
         const productBuffer = Buffer.from(await productImage.arrayBuffer());
         const logoBuffer = Buffer.from(await logoImage.arrayBuffer());
 
-        // 2. Remove Background from Product (if needed)
-        // For hackathon, we assume we always want to ensure a clean cutout
+
         console.log('Removing background...');
         const cleanProductBuffer = await removeBackground(productBuffer);
 
-        // 3. Generate Prompts
+
         console.log('Generating prompts...');
         const prompts = await generateCreativePrompts(productCategory, 3);
 
-        // 4. Prepare for Inpainting
-        // We need to place the product on a 1024x1024 canvas and create a mask
+
         const canvasSize = 1024;
 
-        // Resize product to fit nicely (e.g., 600px max dimension)
+
         const resizedProduct = await sharp(cleanProductBuffer)
             .resize(600, 600, { fit: 'inside' })
             .toBuffer();
@@ -46,7 +44,7 @@ export async function POST(req: NextRequest) {
         const productWidth = productMetadata.width || 0;
         const productHeight = productMetadata.height || 0;
 
-        // Create a transparent canvas with the product centered
+
         const compositedImage = await sharp({
             create: {
                 width: canvasSize,
@@ -59,11 +57,7 @@ export async function POST(req: NextRequest) {
             .png()
             .toBuffer();
 
-        // Create the Mask: White background (to be filled), Black product (to be kept)
-        // Stability AI Mask: "Pixels with a value of 0 (black) are preserved, while pixels with a value of 255 (white) are replaced."
-        // So we want the PRODUCT to be BLACK, and the REST to be WHITE.
 
-        // First, create a white canvas
         const whiteCanvas = await sharp({
             create: {
                 width: canvasSize,
@@ -73,34 +67,29 @@ export async function POST(req: NextRequest) {
             }
         }).png().toBuffer();
 
-        // Now, we need the alpha channel of the composited image to be the mask.
-        // Where alpha is > 0 (product), we want BLACK.
-        // Where alpha is 0 (empty), we want WHITE.
 
-        // Let's use sharp to extract the alpha channel
         const alphaChannel = await sharp(compositedImage)
-            .extractChannel(3) // Alpha channel
+            .extractChannel(3)
             .toBuffer();
 
-        // Invert the alpha channel: Product (opaque) becomes Black (0), Background (transparent) becomes White (255)
+
         const maskBuffer = await sharp(alphaChannel)
             .negate()
             .toFormat('png')
             .toBuffer();
 
-        // 5. Generate Variations Loop
+
         const results = [];
 
         for (const prompt of prompts) {
             console.log(`Generating variation for prompt: ${prompt}`);
 
-            // Generate Background
+
             const generatedImageBuffer = await generateInpaint(compositedImage, maskBuffer, prompt);
 
-            // Overlay Logo
-            // Resize logo to be small (e.g., 150px width)
+
             const resizedLogo = await sharp(logoBuffer)
-                .resize(150, null) // Auto height
+                .resize(150, null)
                 .toBuffer();
 
             const finalImageBuffer = await sharp(generatedImageBuffer)
@@ -108,12 +97,11 @@ export async function POST(req: NextRequest) {
                     input: resizedLogo,
                     gravity: 'southeast',
                     blend: 'over'
-                    // You could add padding/offsets here if needed, but gravity southeast puts it in bottom right
                 }])
                 .png()
                 .toBuffer();
 
-            // Generate Caption
+
             const caption = await generateCaption(productName, prompt);
 
             results.push({
