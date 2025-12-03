@@ -15,6 +15,7 @@ export default function Home() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [results, setResults] = useState<any[]>([]);
   const [error, setError] = useState('');
+  const [loadingStep, setLoadingStep] = useState('');
 
   const handleGenerate = async () => {
     if (!productImage || !logoImage || !productCategory) {
@@ -25,6 +26,20 @@ export default function Home() {
     setIsGenerating(true);
     setError('');
     setResults([]);
+
+
+    setLoadingStep('Analyzing product & removing background...');
+
+    const progressInterval = setInterval(() => {
+      setLoadingStep((prev) => {
+        if (prev === 'Analyzing product & removing background...') return 'Dreaming up creative concepts (Gemini)...';
+        if (prev === 'Dreaming up creative concepts (Gemini)...') return 'Generating Variation 1 of 3 (Stability AI)...';
+        if (prev === 'Generating Variation 1 of 3 (Stability AI)...') return 'Generating Variation 2 of 3 (Stability AI)...';
+        if (prev === 'Generating Variation 2 of 3 (Stability AI)...') return 'Generating Variation 3 of 3 (Stability AI)...';
+        if (prev === 'Generating Variation 3 of 3 (Stability AI)...') return 'Finalizing designs & captions...';
+        return prev;
+      });
+    }, 25000);
 
     try {
       const formData = new FormData();
@@ -39,7 +54,9 @@ export default function Home() {
       console.error(err);
       setError(err.response?.data?.error || 'Failed to generate creatives. Please try again.');
     } finally {
+      clearInterval(progressInterval);
       setIsGenerating(false);
+      setLoadingStep('');
     }
   };
 
@@ -121,9 +138,12 @@ export default function Home() {
               `}
             >
               {isGenerating ? (
-                <span className="flex items-center justify-center gap-2">
-                  <Loader2 className="w-5 h-5 animate-spin" />
-                  Generating...
+                <span className="flex flex-col items-center justify-center gap-2">
+                  <div className="flex items-center gap-2">
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                    <span>Processing...</span>
+                  </div>
+                  <span className="text-xs font-normal text-neutral-400 animate-pulse">{loadingStep}</span>
                 </span>
               ) : (
                 'Generate Creatives'

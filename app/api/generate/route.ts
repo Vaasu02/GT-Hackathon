@@ -115,6 +115,15 @@ export async function POST(req: NextRequest) {
 
     } catch (error: any) {
         console.error('Generation Error:', error);
+
+        // Handling Stability AI Payment Required (402)
+        if (error.response?.status === 402) {
+            return NextResponse.json(
+                { error: 'Stability AI credits exhausted. Please check your API key balance.' },
+                { status: 402 }
+            );
+        }
+
         return NextResponse.json(
             { error: error.message || 'Something went wrong' },
             { status: 500 }
