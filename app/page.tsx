@@ -1,65 +1,152 @@
-import Image from "next/image";
+'use client';
+
+import { useState } from 'react';
+import { DropZone } from '@/components/DropZone';
+import { Gallery } from '@/components/Gallery';
+import { Sparkles, Loader2, Image as ImageIcon } from 'lucide-react';
+import { motion } from 'framer-motion';
+import axios from 'axios';
 
 export default function Home() {
+  const [productImage, setProductImage] = useState<File | null>(null);
+  const [logoImage, setLogoImage] = useState<File | null>(null);
+  const [productCategory, setProductCategory] = useState('');
+  const [productName, setProductName] = useState('');
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [results, setResults] = useState<any[]>([]);
+  const [error, setError] = useState('');
+
+  const handleGenerate = async () => {
+    if (!productImage || !logoImage || !productCategory) {
+      setError('Please fill in all fields and upload images.');
+      return;
+    }
+
+    setIsGenerating(true);
+    setError('');
+    setResults([]);
+
+    try {
+      const formData = new FormData();
+      formData.append('productImage', productImage);
+      formData.append('logoImage', logoImage);
+      formData.append('productCategory', productCategory);
+      formData.append('productName', productName);
+
+      const response = await axios.post('/api/generate', formData);
+      setResults(response.data.results);
+    } catch (err: any) {
+      console.error(err);
+      setError(err.response?.data?.error || 'Failed to generate creatives. Please try again.');
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <main className="min-h-screen p-8 md:p-24 max-w-7xl mx-auto">
+      <motion.div
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="text-center mb-16"
+      >
+        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-neutral-900 border border-neutral-800 mb-6">
+          <Sparkles className="w-4 h-4 text-purple-400" />
+          <span className="text-sm text-neutral-400">AI Creative Studio</span>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+        <h1 className="text-5xl md:text-7xl font-bold tracking-tight mb-6 rich-gradient-text">
+          Brand Creatives<br />Reimagined.
+        </h1>
+        <p className="text-neutral-400 text-lg max-w-2xl mx-auto">
+          Upload your product and logo. Let our AI generate professional, high-converting ad creatives in seconds.
+        </p>
+      </motion.div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
+        {/* Left Panel: Inputs */}
+        <div className="lg:col-span-4 space-y-8">
+          <div className="glass-panel p-6 rounded-2xl space-y-6">
+            <h2 className="text-xl font-semibold flex items-center gap-2">
+              <ImageIcon className="w-5 h-5" />
+              Assets
+            </h2>
+
+            <div className="space-y-4">
+              <DropZone
+                label="Product Image"
+                onFileSelect={setProductImage}
+              />
+              <DropZone
+                label="Brand Logo"
+                onFileSelect={setLogoImage}
+              />
+            </div>
+          </div>
+
+          <div className="glass-panel p-6 rounded-2xl space-y-6">
+            <h2 className="text-xl font-semibold">Details</h2>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-neutral-400 mb-2">Product Name</label>
+                <input
+                  type="text"
+                  value={productName}
+                  onChange={(e) => setProductName(e.target.value)}
+                  placeholder="e.g. Nike Air Max"
+                  className="w-full bg-neutral-900 border border-neutral-800 rounded-lg px-4 py-3 focus:ring-2 focus:ring-purple-500 outline-none transition-all"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-neutral-400 mb-2">Category / Context</label>
+                <input
+                  type="text"
+                  value={productCategory}
+                  onChange={(e) => setProductCategory(e.target.value)}
+                  placeholder="e.g. Running Shoe, Luxury Perfume"
+                  className="w-full bg-neutral-900 border border-neutral-800 rounded-lg px-4 py-3 focus:ring-2 focus:ring-purple-500 outline-none transition-all"
+                />
+              </div>
+            </div>
+
+            <button
+              onClick={handleGenerate}
+              disabled={isGenerating}
+              className={`
+                w-full py-4 rounded-xl font-semibold text-lg transition-all
+                ${isGenerating
+                  ? 'bg-neutral-800 cursor-not-allowed text-neutral-500'
+                  : 'bg-white text-black hover:bg-neutral-200 shadow-[0_0_20px_rgba(255,255,255,0.3)]'
+                }
+              `}
+            >
+              {isGenerating ? (
+                <span className="flex items-center justify-center gap-2">
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                  Generating...
+                </span>
+              ) : (
+                'Generate Creatives'
+              )}
+            </button>
+
+            {error && (
+              <p className="text-red-400 text-sm text-center">{error}</p>
+            )}
+          </div>
         </div>
-      </main>
-    </div>
+
+        {/* Right Panel: Results */}
+        <div className="lg:col-span-8">
+          {results.length > 0 ? (
+            <Gallery results={results} />
+          ) : (
+            <div className="h-full min-h-[400px] flex flex-col items-center justify-center text-neutral-600 border-2 border-dashed border-neutral-900 rounded-3xl">
+              <Sparkles className="w-12 h-12 mb-4 opacity-20" />
+              <p>Generated creatives will appear here</p>
+            </div>
+          )}
+        </div>
+      </div>
+    </main>
   );
 }
