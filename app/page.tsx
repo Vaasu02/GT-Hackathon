@@ -54,8 +54,9 @@ export default function Home() {
           <Sparkles className="w-4 h-4 text-purple-400" />
           <span className="text-sm text-neutral-400">AI Creative Studio</span>
         </div>
-        <h1 className="text-5xl md:text-7xl font-bold tracking-tight mb-6 rich-gradient-text">
-          Brand Creatives<br />Reimagined.
+        <h1 className="text-5xl md:text-7xl font-bold tracking-tight mb-6 leading-tight pb-2">
+          <span className="rich-gradient-text">Brand Creatives</span><br />
+          <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-purple-600">Reimagined.</span>
         </h1>
         <p className="text-neutral-400 text-lg max-w-2xl mx-auto">
           Upload your product and logo. Let our AI generate professional, high-converting ad creatives in seconds.
