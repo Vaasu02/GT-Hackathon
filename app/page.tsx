@@ -33,13 +33,16 @@ export default function Home() {
     const progressInterval = setInterval(() => {
       setLoadingStep((prev) => {
         if (prev === 'Analyzing product & removing background...') return 'Dreaming up creative concepts (Gemini)...';
-        if (prev === 'Dreaming up creative concepts (Gemini)...') return 'Generating Variation 1 of 3 (Stability AI)...';
-        if (prev === 'Generating Variation 1 of 3 (Stability AI)...') return 'Generating Variation 2 of 3 (Stability AI)...';
-        if (prev === 'Generating Variation 2 of 3 (Stability AI)...') return 'Generating Variation 3 of 3 (Stability AI)...';
-        if (prev === 'Generating Variation 3 of 3 (Stability AI)...') return 'Finalizing designs & captions...';
+        if (prev === 'Dreaming up creative concepts (Gemini)...') return 'Generating Variation 1 of 6 (Stability AI)...';
+        if (prev === 'Generating Variation 1 of 6 (Stability AI)...') return 'Generating Variation 2 of 6 (Stability AI)...';
+        if (prev === 'Generating Variation 2 of 6 (Stability AI)...') return 'Generating Variation 3 of 6 (Stability AI)...';
+        if (prev === 'Generating Variation 3 of 6 (Stability AI)...') return 'Generating Variation 4 of 6 (Stability AI)...';
+        if (prev === 'Generating Variation 4 of 6 (Stability AI)...') return 'Generating Variation 5 of 6 (Stability AI)...';
+        if (prev === 'Generating Variation 5 of 6 (Stability AI)...') return 'Generating Variation 6 of 6 (Stability AI)...';
+        if (prev === 'Generating Variation 6 of 6 (Stability AI)...') return 'Finalizing designs & captions...';
         return prev;
       });
-    }, 25000);
+    }, 20000);
 
     try {
       const formData = new FormData();

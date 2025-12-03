@@ -1,7 +1,8 @@
 'use client';
 
+import { useState } from 'react';
 import JSZip from 'jszip';
-import { Download, Copy, Package } from 'lucide-react';
+import { Download, Copy, Package, Check } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 interface Result {
@@ -15,7 +16,15 @@ interface GalleryProps {
 }
 
 export function Gallery({ results }: GalleryProps) {
+    const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
+
     if (results.length === 0) return null;
+
+    const handleCopy = (text: string, index: number) => {
+        navigator.clipboard.writeText(text);
+        setCopiedIndex(index);
+        setTimeout(() => setCopiedIndex(null), 2000);
+    };
 
     const handleDownloadZip = async () => {
         const zip = new JSZip();
@@ -94,11 +103,15 @@ export function Gallery({ results }: GalleryProps) {
                             <div className="mt-3 pt-3 border-t border-neutral-800 flex justify-between items-center">
                                 <span className="text-xs text-neutral-500 uppercase tracking-wider">Variation {index + 1}</span>
                                 <button
-                                    onClick={() => navigator.clipboard.writeText(result.caption)}
-                                    className="text-neutral-500 hover:text-white transition-colors"
+                                    onClick={() => handleCopy(result.caption, index)}
+                                    className="text-neutral-500 hover:text-white transition-colors flex items-center gap-1"
                                     title="Copy Caption"
                                 >
-                                    <Copy className="w-3 h-3" />
+                                    {copiedIndex === index ? (
+                                        <Check className="w-3 h-3 text-green-500" />
+                                    ) : (
+                                        <Copy className="w-3 h-3" />
+                                    )}
                                 </button>
                             </div>
                         </div>

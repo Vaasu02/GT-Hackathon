@@ -30,7 +30,7 @@ export async function POST(req: NextRequest) {
 
 
         console.log('Generating prompts...');
-        const prompts = await generateCreativePrompts(productCategory, 3);
+        const prompts = await generateCreativePrompts(productCategory, 6);
 
 
         const canvasSize = 1024;
